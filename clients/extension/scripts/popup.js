@@ -29,6 +29,40 @@ const NON_BUG_ERROR_MESSAGES = {
       ' with http:// or https://.',
 };
 
+const PSI_KEY = 'AIzaSyAjcDRNN9CX9dCazhqI4lGR7yyQbkd_oYE';
+
+/** @typedef {{lighthouseResult: LH.Result}} PSIResponse */
+
+/**
+ * @param {string} url
+ * @return {Promise<PSIResponse>}
+ */
+async function callPSI(url) {
+  const psiUrl = new URL('https://www.googleapis.com/pagespeedonline/v5/runPagespeed');
+  /** @type {Record<string, string | string[]>} */
+  const params = {
+    url,
+    category: [
+      'performance',
+      'accessibility',
+      'seo',
+      'best-practices',
+      'pwa',
+    ],
+    strategy: 'mobile',
+    utm_source: 'Lighthouse Chrome Extension',
+  };
+  Object.entries(params).forEach(([key, value]) => {
+    const values = Array.isArray(value) ? value : [value];
+    for (const singleValue of values) {
+      psiUrl.searchParams.append(key, singleValue);
+    }
+  });
+  const response = await fetch(psiUrl.href);
+  const json = await response.json();
+  return json;
+}
+
 /** @type {?string} */
 let siteURL = null;
 /** @type {boolean} */
@@ -128,8 +162,9 @@ async function onGenerateReportButtonClick(siteURL) {
   const statusMsg = find('.status__msg');
   statusMsg.textContent = 'Starting...';
 
-  // TODO get LHR from PSI.
   console.log(siteURL);
+  const psiResponse = await callPSI(siteURL);
+  console.log('psiResponse', psiResponse);
 
   isRunning = false;
 }
