@@ -5,6 +5,7 @@
  */
 'use strict';
 
+/** @typedef {typeof import('./lighthouse-background-page.js') & {console: typeof console}} BackgroundPage */
 /** @typedef {import('../../../lighthouse-core/lib/lh-error.js')} LighthouseError */
 
 /**
@@ -150,9 +151,10 @@ function logStatus([, message, details]) {
 
 /**
  * Click event handler for Generate Report button.
+ * @param {BackgroundPage} background
  * @param {string} siteURL
  */
-async function onGenerateReportButtonClick(siteURL) {
+async function onGenerateReportButtonClick(background, siteURL) {
   if (isRunning) {
     return;
   }
@@ -162,9 +164,8 @@ async function onGenerateReportButtonClick(siteURL) {
   const statusMsg = find('.status__msg');
   statusMsg.textContent = 'Starting...';
 
-  console.log(siteURL);
   const psiResponse = await callPSI(siteURL);
-  console.log('psiResponse', psiResponse);
+  background.openTabAndSendJsonReport(psiResponse.lighthouseResult);
 
   isRunning = false;
 }
@@ -183,11 +184,20 @@ async function initPopup() {
     find('header h2').textContent = siteURL ? new URL(siteURL).origin : '';
   });
 
+  const backgroundPagePromise = new Promise(resolve => chrome.runtime.getBackgroundPage(resolve));
+
+  /**
+   * Really the Window of the background page, but since we only want what's exposed
+   * on window in extension-entry.js, use its module API as the type.
+   * @type {BackgroundPage}
+   */
+  const background = await backgroundPagePromise;
+
   // bind Generate Report button
   const generateReportButton = find('#generate-report');
   generateReportButton.addEventListener('click', () => {
     if (siteURL) {
-      onGenerateReportButtonClick(siteURL);
+      onGenerateReportButtonClick(background, siteURL);
     }
   });
 }

@@ -18,16 +18,13 @@ const distDir = __dirname + '/../dist/extension';
 const manifestVersion = require(`${sourceDir}/manifest.json`).version;
 
 /**
- * Copy popup.js to dist folder, inlining the current commit hash along the way.
- * @return {Promise<void>}
+ * Inline the current commit hash in dist folder popup.js
  */
-async function copyPopup() {
-  let popupSrc = fs.readFileSync(`${sourceDir}/scripts/popup.js`, {encoding: 'utf8'});
-  popupSrc = popupSrc.replace(/__COMMITHASH__/g, bundleBuilder.COMMIT_HASH);
-
-  const popupDir = `${distDir}/scripts`;
-  await makeDir(popupDir);
-  fs.writeFileSync(`${popupDir}/popup.js`, popupSrc);
+function injectCommitHash() {
+  const popupPath = `${distDir}/scripts/popup.js`;
+  const modifiedSource = fs.readFileSync(popupPath, {encoding: 'utf8'})
+    .replace(/__COMMITHASH__/g, bundleBuilder.COMMIT_HASH);
+  fs.writeFileSync(popupPath, modifiedSource);
 }
 
 /**
@@ -38,6 +35,7 @@ async function copyAssets() {
     '*.html',
     'styles/**/*.css',
     'images/**/*',
+    'scripts/**/*',
     'manifest.json',
     '_locales/**', // currently non-functional
   ], distDir, {
@@ -76,11 +74,8 @@ async function run() {
   if (argv.includes('package')) {
     return packageExtension();
   }
-
-  await Promise.all([
-    copyAssets(),
-    copyPopup(),
-  ]);
+  await copyAssets();
+  injectCommitHash();
 }
 
 run();

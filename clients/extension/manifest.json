@@ -9,6 +9,12 @@
     "128": "images/lh_logo_bg.png"
   },
   "default_locale": "en",
+  "background": {
+    "scripts": [
+      "scripts/lighthouse-background-page.js"
+    ],
+    "persistent": false
+  },
   "permissions": [
     "activeTab"
   ],
@@ -19,5 +25,23 @@
     "default_title": "Lighthouse",
     "default_popup": "popup.html"
   },
-  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'none'"
+  "content_scripts": [
+    {
+      "matches": [
+        "https://googlechrome.github.io/*",
+        "http://localhost:8000/*"
+      ],
+      "js": [
+        "scripts/lighthouse-content-script.js"
+      ],
+      "run_at": "document_start"
+    }
+  ],
+  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'none'",
+  "externally_connectable": {
+    "matches": [
+      "https://googlechrome.github.io/*",
+      "http://localhost:8000/*"
+    ]
+  }
 }

@@ -356,7 +356,11 @@ class LighthouseReportViewer {
    */
   _listenForMessages() {
     window.addEventListener('message', e => {
-      if (e.source === self.opener && e.data.lhresults) {
+      // "Open in Viewer" from ReportUIFeatures.
+      const fromOpener = e.source === self.opener;
+      // Content script from extension.
+      const fromSelf = e.source === window;
+      if ((fromOpener || fromSelf) && e.data.lhresults) {
         this._reportIsFromGist = false;
         this._replaceReportHtml(e.data.lhresults);
 
