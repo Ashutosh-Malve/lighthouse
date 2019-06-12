@@ -12,22 +12,10 @@ const cpy = require('cpy');
 const makeDir = require('make-dir');
 const bundleBuilder = require('./build-bundle.js');
 
-const sourceName = 'extension-entry.js';
-const distName = 'lighthouse-ext-bundle.js';
-
 const sourceDir = __dirname + '/../clients/extension';
 const distDir = __dirname + '/../dist/extension';
 
 const manifestVersion = require(`${sourceDir}/manifest.json`).version;
-
-/**
- * Browserify and minify entry point.
- */
-function buildEntryPoint() {
-  const inFile = `${sourceDir}/scripts/${sourceName}`;
-  const outFile = `${distDir}/scripts/${distName}`;
-  return bundleBuilder.build(inFile, outFile);
-}
 
 /**
  * Copy popup.js to dist folder, inlining the current commit hash along the way.
@@ -90,7 +78,6 @@ async function run() {
   }
 
   await Promise.all([
-    buildEntryPoint(),
     copyAssets(),
     copyPopup(),
   ]);
