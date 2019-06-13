@@ -40,6 +40,7 @@ function openTabAndSendJsonReport(lhr) {
     }
   */
   // chrome.runtime.onConnectExternal.addListener(function msgHandler(port) {
+  // // This callback is called as expected, but the message never makes it to the viewer.
   //   if (!port.sender || !port.sender.url
   //     || new URL(port.sender.url).origin !== VIEWER_ORIGIN) {
   //     return;
